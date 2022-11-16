@@ -23,8 +23,8 @@ public class RuleWrapper {
     @ApiModelProperty("规则优先级")
     protected int priority;
 
+    //"spel-sp表达式 不好封装,它的facts要是bean对象--> #{['user'].age != null }"
     @ApiModelProperty("规则类型：mvel-mv表达式 " +
-            "spel-sp表达式 " +
             "custom-自定义（自定义要填写自定义规则路径）" +
             "unitRuleGroup-且条件规则组 " +
             "conditionalRuleGroup-满足第一条（第一条指的是优先级最高的规则只有一条）的时候，才会执行后面规则"+

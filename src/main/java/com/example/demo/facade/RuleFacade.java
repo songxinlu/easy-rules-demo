@@ -3,9 +3,7 @@ package com.example.demo.facade;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.entity.RuleWrapper;
-import com.example.demo.rulelistener.RuleExeListener;
 import com.example.demo.vo.ELEasyRulesVO;
-import com.example.demo.entity.User;
 import com.google.common.collect.Lists;
 import org.jeasy.rules.api.*;
 import org.jeasy.rules.core.DefaultRulesEngine;
@@ -17,7 +15,11 @@ import org.jeasy.rules.support.composite.UnitRuleGroup;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Objects;
 
@@ -131,8 +133,21 @@ public class RuleFacade {
 
                     case "custom":  //自定义规则
                         try {
-                            Class cl = Class.forName(ruleVO.getCustomRulePath());
-                            Object rule = cl.getConstructor(String.class, String.class, int.class).newInstance(ruleVO.getName(),
+//                            File file=new File("D:\\java\\workspace\\java\\workspaces\\easy-rules-demo\\src\\main\\java\\com\\example\\demo\\rule");
+//                            URL url=file.toURI().toURL();
+//                            ClassLoader loader=new URLClassLoader(new URL[]{url});//创建类载入器
+//                            //import com.sun.org.apache.bcel.internal.util.ClassLoader;
+////                            ClassLoader classLoader = new ClassLoader(new String[]{""});//类路径
+//                            Class<?> cls=loader.loadClass(ruleVO.getCustomRulePath());//载入指定类。注意一定要带上类的包名
+
+                                /*动态载入指定jar包调用当中某个类的方法*/
+                            String [] tempArr=  ruleVO.getCustomRulePath().split("\\.");
+                            File file=new File( (System.getProperty("user.dir") + "\\" ).replace("\\","/")
+                                    +"src/main/resources/rule/"+tempArr[tempArr.length-1]+".jar");//jar包的路径
+                            URL url=file.toURI().toURL();
+                            ClassLoader loader=new URLClassLoader(new URL[]{url});//创建类载入器
+                            Class<?> cls=loader.loadClass(ruleVO.getCustomRulePath());//载入指定类，注意一定要带上类的包名
+                            Object rule = cls.getConstructor(String.class, String.class, int.class).newInstance(ruleVO.getName(),
                                     ruleVO.getDescription(),
                                     ruleVO.getPriority());
 
@@ -148,6 +163,8 @@ public class RuleFacade {
                         } catch (NoSuchMethodException e) {
                             e.printStackTrace();
                         } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
                         break;

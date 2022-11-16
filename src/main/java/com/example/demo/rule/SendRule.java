@@ -1,13 +1,10 @@
 package com.example.demo.rule;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.jeasy.rules.annotation.Action;
 import org.jeasy.rules.annotation.Condition;
 import org.jeasy.rules.annotation.Rule;
 import org.jeasy.rules.api.Facts;
 
-import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 
 /**
@@ -18,7 +15,7 @@ import java.util.LinkedHashMap;
  * @Version: 1.0
  */
 @Rule
-public class SendRule implements Rule{
+public class SendRule{
     private String name;
     private String description;
     private int priority;
@@ -35,35 +32,23 @@ public class SendRule implements Rule{
         map.get("integral");
         int integral = (int) map.get("integral");;
         if(integral>125){
-            facts.put("lh","积分已够，可以落户");
+            facts.put("out","积分已够，可以落户");
+            return true;
         }else {
-            facts.put("lh","积分不够，无法落户");
+            facts.put("out","积分不够，无法落户");
         }
-        return true;
+        return false;
     }
 
-    @Action
-    public void send(Facts facts) {
-        System.out.println(facts.get("lh").toString());
+    @Action(order = 1)
+    public void print(Facts facts) {
+        System.out.println(facts.get("out").toString());
     }
 
-    @Override
-    public String name() {
-        return name;
+    @Action(order = 2)
+    public void sendSms(Facts facts) {
+        //调用发送信息接口
+        System.out.println("短信发送成功");
     }
 
-    @Override
-    public String description() {
-        return description;
-    }
-
-    @Override
-    public int priority() {
-        return priority;
-    }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return null;
-    }
 }
